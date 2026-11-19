@@ -1,0 +1,46 @@
+name: Refresh VALD data
+
+on:
+  schedule:
+    # Daily at 11:17 UTC (3:17 am PST / 4:17 am PDT). Change to weekly with
+    # e.g. "17 11 * * 1" (Mondays).
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+    inputs:
+      only_team:
+        description: "Optional: run only this team_slug from config/teams.csv (e.g. mbb)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: refresh-vald
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+
+      - name: Pull from VALD and publish to R2
+        run: Rscript R/run_all.R
+        env:
+          ONLY_TEAM: ${{ github.event.inputs.only_team }}
+          VALD_CLIENT_ID: ${{ secrets.VALD_CLIENT_ID }}
+          VALD_CLIENT_SECRET: ${{ secrets.VALD_CLIENT_SECRET }}
+          VALD_ORG_ID: ${{ secrets.VALD_ORG_ID }}
+          VALD_REGION: ${{ secrets.VALD_REGION }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}

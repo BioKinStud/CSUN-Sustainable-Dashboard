@@ -1,0 +1,14 @@
+# Never commit data, credentials or athlete information.
+*.csv
+!config/*.csv
+*.xlsx
+*.xls
+.Renviron
+.Rhistory
+.RData
+.Rproj.user/
+data/
+output/
+.env
+.dev.vars
+node_modules/
